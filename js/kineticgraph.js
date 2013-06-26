@@ -8,10 +8,11 @@
 
 	// make a new graph
 	var graph = new Springy.Graph();
-	var layer = new Kinetic.Layer();
+	var nodeLayer = new Kinetic.Layer();
+	var edgeLayer = new Kinetic.Layer();
 
 	function createNode(label) {
-		var circle = new Kinetic.Circle({		
+		var circle = new Kinetic.Circle({
 			x: stage.getWidth() / 2,
 			y: stage.getHeight() / 2,
 			radius: 10,
@@ -20,11 +21,17 @@
 			strokeWidth: 2
 		});
 
-		// add the shape to the layer
-		layer.add(circle);
 
-		// make some nodes
+		// add the shape to the layer
+		nodeLayer.add(circle);
+
 		var node = graph.newNode({ label: label, shape: circle });
+
+		circle.on('click', function() {
+			var newGuy = createNode('son of ' + label);
+			createEdge(node, newGuy);
+		});
+
 		return node;
 	}
 
@@ -37,7 +44,7 @@
 			strokeWidth: 2
 		});
 
-		layer.add(line);
+		edgeLayer.add(line);
 
 		var edge = graph.newEdge(from, to, {
 			line: line
@@ -56,9 +63,9 @@
 	createEdge(pine, bean);
 	createEdge(pine, spam);
 
-	// add the layer to the stage
-	stage.add(layer);
-
+	// add the layers to the stage
+	stage.add(edgeLayer);
+	stage.add(nodeLayer);
 
 	var layout = new Springy.Layout.ForceDirected(graph,
 		400.0, // Spring stiffness
@@ -67,18 +74,19 @@
 	);
 
 	var renderer = new Springy.Renderer(layout,
-		
+
 		function clear() {
-	    // code to clear screen
+
 		},
 
 		function drawEdge(edge, p1, p2) {
-		    edge.data.line.setPoints([
-		    	edge.source.data.shape.attrs.x,
-		    	edge.source.data.shape.attrs.y,
-		    	edge.target.data.shape.attrs.x,
-		    	edge.target.data.shape.attrs.y
-		    ]);
+			edge.data.line.setPoints([
+				edge.source.data.shape.attrs.x,
+				edge.source.data.shape.attrs.y,
+				edge.target.data.shape.attrs.x,
+				edge.target.data.shape.attrs.y
+			]);
+			edgeLayer.draw();
 		},
 
 		function drawNode(node, p) {
@@ -86,7 +94,7 @@
 			var y = p.y * 20 + 200;
 
 			node.data.shape.setAbsolutePosition(x, y);
-			layer.draw();
+			nodeLayer.draw();
 		}
 	);
 
