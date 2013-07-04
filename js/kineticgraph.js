@@ -86,7 +86,6 @@
 				edge.target.data.shape.attrs.x,
 				edge.target.data.shape.attrs.y
 			]);
-			edgeLayer.draw();
 		},
 
 		function drawNode(node, p) {
@@ -94,11 +93,14 @@
 			var y = p.y * 20 + 200;
 
 			node.data.shape.setAbsolutePosition(x, y);
-			nodeLayer.draw();
 		}
 	);
 
-
 	renderer.start();
+
+	setInterval(function() {
+		edgeLayer.draw();
+		nodeLayer.draw();
+	}, 10);
 
 })('graph');
