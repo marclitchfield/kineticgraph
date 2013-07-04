@@ -15,9 +15,9 @@
 		stage.add(nodeLayer);
 
 		var layout = new Springy.Layout.ForceDirected(graph,
-			400.0,  // Spring stiffness
-			400.0,  // Node repulsion
-			0.5     // Damping
+			200.0,  // Spring stiffness
+			100.0,  // Node repulsion
+			0.6     // Damping
 		);
 
 		var renderer = new Springy.Renderer(layout,
@@ -42,6 +42,33 @@
 
 		renderer.start();
 
+		function applyAges(currentNode) {
+			currentNode.age = 0;
+			graph.nodes.forEach(function(n) {
+
+				if (graph.adjacency[currentNode.id][n.id]) {
+					n.age = 1;
+				} else {
+					n.age = (n.age || 0) + 1;
+				}
+
+				if (n.age >= 80) {
+					graph.edges.forEach(function(e) {
+						if (e.source.id === n.id || e.target.id === n.id) {
+							e.data.line.destroy();
+						}
+					})
+	
+					n.data.shape.destroy();
+					graph.removeNode(n);
+				} else {
+					var color = tinycolor({ h: 250 - n.age * 4, s: 1, v: 1 });
+					n.data.shape.setFillRGB(color.toRgb());					
+				}
+
+			});
+		}
+
 		function createNode(label) { 
 			var circle = new Kinetic.Circle({
 				x: stage.getWidth() / 2,
@@ -58,9 +85,11 @@
 
 			var node = graph.newNode({ label: label, shape: circle });
 
-			circle.on('click', function() {
+			circle.on('mousemove', function() {
 				var newGuy = createNode(label + "'");
 				createEdge(node, newGuy);
+
+				applyAges(node);
 			});
 
 			return node;
