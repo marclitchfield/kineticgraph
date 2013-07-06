@@ -3,15 +3,20 @@
 	var stage = new Kinetic.Stage({
 		container: containerId,
 		draggable: true,
-		width: 1200,
-		height: 900
+		width: window.innerWidth,
+		height: window.innerHeight
 	});
+
+	window.onresize = function(event) {
+		stage.setWidth(window.innerWidth);
+		stage.setHeight(window.innerHeight);
+	};
 
 	var kineticGraph = (function(stage) {
 		var graph = new Springy.Graph();
 		var nodeLayer = new Kinetic.Layer();
 		var edgeLayer = new Kinetic.Layer();
-	
+
 		stage.add(edgeLayer);
 		stage.add(nodeLayer);
 
@@ -58,19 +63,19 @@
 						if (e.source.id === n.id || e.target.id === n.id) {
 							e.data.line.destroy();
 						}
-					})
-	
+					});
+
 					n.data.shape.destroy();
 					graph.removeNode(n);
 				} else {
 					var color = tinycolor({ h: 250 - n.age * 8, s: 1, v: 1 });
-					n.data.shape.setFillRGB(color.toRgb());					
+					n.data.shape.setFillRGB(color.toRgb());
 				}
 
 			});
 		}
 
-		function createNode(label) { 
+		function createNode(label) {
 			var circle = new Kinetic.Circle({
 				x: stage.getWidth() / 2,
 				y: stage.getHeight() / 2,
