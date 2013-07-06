@@ -2,6 +2,7 @@
 
 	var stage = new Kinetic.Stage({
 		container: containerId,
+		draggable: true,
 		width: 1200,
 		height: 900
 	});
@@ -36,7 +37,7 @@
 				var x = p.x * 20 + 400;
 				var y = p.y * 20 + 200;
 
-				node.data.shape.setAbsolutePosition(x, y);
+				node.data.shape.setPosition(x, y);
 			}
 		);
 
@@ -52,7 +53,7 @@
 					n.age = (n.age || 0) + 1;
 				}
 
-				if (n.age >= 80) {
+				if (n.age >= 40) {
 					graph.edges.forEach(function(e) {
 						if (e.source.id === n.id || e.target.id === n.id) {
 							e.data.line.destroy();
@@ -62,7 +63,7 @@
 					n.data.shape.destroy();
 					graph.removeNode(n);
 				} else {
-					var color = tinycolor({ h: 250 - n.age * 4, s: 1, v: 1 });
+					var color = tinycolor({ h: 250 - n.age * 8, s: 1, v: 1 });
 					n.data.shape.setFillRGB(color.toRgb());					
 				}
 
