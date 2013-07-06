@@ -338,7 +338,16 @@
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
 			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
-			this.nodePoints[node.id] = new Layout.ForceDirected.Point(Vector.random(), mass);
+
+			var hasParentPosition = (node.data.parent !== undefined
+				&& node.data.parent.data.position !== undefined);
+
+			var position = hasParentPosition ?
+				node.data.parent.data.position.p.add(Vector.random().multiply(1.2)) :
+				Vector.random();
+
+			node.data.position = new Layout.ForceDirected.Point(position, mass);
+			this.nodePoints[node.id] = node.data.position;
 		}
 
 		return this.nodePoints[node.id];
@@ -565,7 +574,7 @@
 	};
 
 	Vector.random = function() {
-		return new Vector(10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5));
+		return new Vector(10.0 * (Math.random() - 0.5), 10.0 * (Math.random() - 0.5));
 	};
 
 	Vector.prototype.add = function(v2) {

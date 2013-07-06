@@ -41,8 +41,8 @@
 			function drawNode(node, p) {
 				var x = p.x * 20 + 400;
 				var y = p.y * 20 + 200;
-
 				node.data.shape.setPosition(x, y);
+				node.data.shape.setVisible(true);
 			}
 		);
 
@@ -75,24 +75,23 @@
 			});
 		}
 
-		function createNode(label) {
+		function createNode(label, parent) {
 			var circle = new Kinetic.Circle({
-				x: stage.getWidth() / 2,
-				y: stage.getHeight() / 2,
 				radius: 10,
 				fill: 'gray',
 				stroke: 'black',
-				strokeWidth: 2
+				strokeWidth: 2,
+				visible: false
 			});
 
 
 			// add the shape to the layer
 			nodeLayer.add(circle);
 
-			var node = graph.newNode({ label: label, shape: circle });
+			var node = graph.newNode({ label: label, shape: circle, parent: parent });
 
 			circle.on('mousemove', function() {
-				var newGuy = createNode(label + "'");
+				var newGuy = createNode(label + "'", node);
 				createEdge(node, newGuy);
 
 				applyAges(node);
