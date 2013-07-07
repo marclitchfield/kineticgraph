@@ -48,31 +48,94 @@
 
 		renderer.start();
 
-		function applyAges(currentNode) {
-			currentNode.age = 0;
-			graph.nodes.forEach(function(n) {
+		// Dijkstra's path finding algorithm
+		function computeDistancesFrom(fromId) {
+			var distances = _.object(_.map(graph.nodes, function(n) { 
+				return [n.id, n.id === fromId ? 0 : Infinity]; 
+			}));
 
-				if (graph.adjacency[currentNode.id][n.id]) {
-					n.age = 1;
-				} else {
-					n.age = (n.age || 0) + 1;
+			console.log('d0', distances);
+
+			var unvisited = _.map(graph.nodes, function(n) { return n.id; });
+			
+			visitNode(fromId);
+
+			function visitNode(nodeId) {
+				unvisited = _.filter(unvisited, function(n) { return n !== nodeId; });				
+			}
+
+			function getUnvisitedNeighborsOf(nodeId) {
+				var neighbors = {};
+				graph.edges.forEach(function(e) {
+					if (e.source.id === nodeId) { neighbors[e.target.id] = true; }
+					if (e.target.id === nodeId) { neighbors[e.source.id] = true; }
+				});
+
+				neighbors = _.map(_.keys(neighbors), function(n) { return parseInt(n,10); });
+				console.log(nodeId, 'neighbors', neighbors, 'unvisited', unvisited);
+
+				return _.intersection(unvisited, neighbors);
+			}
+
+			function computeUnvisitedNeighborDistances(nodeId) {
+				var unvisitedNeighbors = getUnvisitedNeighborsOf(nodeId);
+
+				unvisitedNeighbors.forEach(function(neighborId) {
+					if (distances[nodeId] + 1 < distances[neighborId]) {
+						distances[neighborId] = distances[nodeId] + 1;
+					}
+				});
+			}
+
+			function findNearestUnvisitedNode() {
+				var nearest = undefined, min = Infinity;
+				unvisited.forEach(function(n) {
+					if (distances[n] < min) {
+						nearest = n;
+						min = distances[n];
+					}
+				});
+				return nearest;
+			}
+
+			function traverseGraph(currentId) {
+				if (unvisited.length > 0) {
+					computeUnvisitedNeighborDistances(currentId);
+					visitNode(currentId);
+					var nextId = findNearestUnvisitedNode();
+					if (nextId !== undefined) {
+						traverseGraph(nextId);
+					}
 				}
+			}
 
-				if (n.age >= 40) {
-					graph.edges.forEach(function(e) {
-						if (e.source.id === n.id || e.target.id === n.id) {
-							e.data.line.destroy();
-						}
-					});
+			traverseGraph(fromId);
+			return distances;
+		}
 
-					n.data.shape.destroy();
-					graph.removeNode(n);
+		function applyDistances(currentNode) {
+			var distances = computeDistancesFrom(currentNode.id);
+			console.log(currentNode.id, distances);
+			
+			graph.nodes.forEach(function(n) {
+				var distance = distances[n.id];
+				if (distances[n.id] >= 15) {
+					removeNode(n);
 				} else {
-					var color = tinycolor({ h: 250 - n.age * 8, s: 1, v: 1 });
+					var color = tinycolor({ h: 255 - distance * 20, s: 1, v: 1 });
 					n.data.shape.setFillRGB(color.toRgb());
 				}
-
 			});
+		}
+
+		function removeNode(node) {
+			graph.edges.forEach(function(e) {
+				if (e.source.id === node.id || e.target.id === node.id) {
+					e.data.line.destroy();
+				}
+			});
+			node.data.shape.destroy();
+			graph.removeNode(node);
 		}
 
 		function createNode(label, parent) {
@@ -84,7 +147,6 @@
 				visible: false
 			});
 
-
 			// add the shape to the layer
 			nodeLayer.add(circle);
 
@@ -93,8 +155,7 @@
 			circle.on('mousemove', function() {
 				var newGuy = createNode(label + "'", node);
 				createEdge(node, newGuy);
-
-				applyAges(node);
+				applyDistances(node);
 			});
 
 			return node;
