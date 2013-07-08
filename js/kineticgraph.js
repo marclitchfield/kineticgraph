@@ -48,81 +48,18 @@
 
 		renderer.start();
 
-		// Dijkstra's path finding algorithm
-		function computeDistancesFrom(fromId) {
-			var distances = _.object(_.map(graph.nodes, function(n) { 
-				return [n.id, n.id === fromId ? 0 : Infinity]; 
-			}));
+		var distanceSolver = new DistanceSolver(graph);
 
-			console.log('d0', distances);
-
-			var unvisited = _.map(graph.nodes, function(n) { return n.id; });
-			
-			visitNode(fromId);
-
-			function visitNode(nodeId) {
-				unvisited = _.filter(unvisited, function(n) { return n !== nodeId; });				
-			}
-
-			function getUnvisitedNeighborsOf(nodeId) {
-				var neighbors = {};
-				graph.edges.forEach(function(e) {
-					if (e.source.id === nodeId) { neighbors[e.target.id] = true; }
-					if (e.target.id === nodeId) { neighbors[e.source.id] = true; }
-				});
-
-				neighbors = _.map(_.keys(neighbors), function(n) { return parseInt(n,10); });
-				console.log(nodeId, 'neighbors', neighbors, 'unvisited', unvisited);
-
-				return _.intersection(unvisited, neighbors);
-			}
-
-			function computeUnvisitedNeighborDistances(nodeId) {
-				var unvisitedNeighbors = getUnvisitedNeighborsOf(nodeId);
-
-				unvisitedNeighbors.forEach(function(neighborId) {
-					if (distances[nodeId] + 1 < distances[neighborId]) {
-						distances[neighborId] = distances[nodeId] + 1;
-					}
-				});
-			}
-
-			function findNearestUnvisitedNode() {
-				var nearest = undefined, min = Infinity;
-				unvisited.forEach(function(n) {
-					if (distances[n] < min) {
-						nearest = n;
-						min = distances[n];
-					}
-				});
-				return nearest;
-			}
-
-			function traverseGraph(currentId) {
-				if (unvisited.length > 0) {
-					computeUnvisitedNeighborDistances(currentId);
-					visitNode(currentId);
-					var nextId = findNearestUnvisitedNode();
-					if (nextId !== undefined) {
-						traverseGraph(nextId);
-					}
-				}
-			}
-
-			traverseGraph(fromId);
-			return distances;
-		}
-
-		function applyDistances(currentNode) {
-			var distances = computeDistancesFrom(currentNode.id);
-			console.log(currentNode.id, distances);
+		function removeDistantNodes(currentNode) {
+			var distances = distanceSolver.computeDistancesFrom(currentNode.id);
+			console.log('nodes:', _.keys(distances).length)
 			
 			graph.nodes.forEach(function(n) {
 				var distance = distances[n.id];
-				if (distances[n.id] >= 15) {
+				if (distances[n.id] >= 10) {
 					removeNode(n);
 				} else {
-					var color = tinycolor({ h: 255 - distance * 20, s: 1, v: 1 });
+					var color = tinycolor({ h: 255 - distance * 30, s: 1, v: 1 });
 					n.data.shape.setFillRGB(color.toRgb());
 				}
 			});
@@ -153,9 +90,11 @@
 			var node = graph.newNode({ label: label, shape: circle, parent: parent });
 
 			circle.on('mousemove', function() {
-				var newGuy = createNode(label + "'", node);
-				createEdge(node, newGuy);
-				applyDistances(node);
+				for(var i=0; i<20; i++) {
+					var newGuy = createNode(label + "'", node);
+					createEdge(node, newGuy);
+				}
+				removeDistantNodes(node);
 			});
 
 			return node;
