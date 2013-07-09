@@ -22,8 +22,8 @@
 
 		var layout = new Springy.Layout.ForceDirected(graph,
 			200.0,  // Spring stiffness
-			100.0,  // Node repulsion
-			0.6     // Damping
+			200.0,  // Node repulsion
+			0.2     // Damping
 		);
 
 		var renderer = new Springy.Renderer(layout,
@@ -90,7 +90,7 @@
 			var node = graph.newNode({ label: label, shape: circle, parent: parent });
 
 			circle.on('mousemove', function() {
-				for(var i=0; i<20; i++) {
+				for(var i=0; i<4; i++) {
 					var newGuy = createNode(label + "'", node);
 					createEdge(node, newGuy);
 				}
