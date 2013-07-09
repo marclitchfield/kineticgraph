@@ -330,7 +330,7 @@
 		this.stiffness = stiffness; // spring stiffness constant
 		this.repulsion = repulsion; // repulsion constant
 		this.damping = damping; // velocity damping factor
-
+		this.maxVelocity = 10;
 		this.nodePoints = {}; // keep track of points associated with nodes
 		this.edgeSprings = {}; // keep track of springs associated with edges
 	};
@@ -459,6 +459,11 @@
 			// Is this, along with updatePosition below, the only places that your
 			// integration code exist?
 			point.v = point.v.add(point.a.multiply(timestep)).multiply(this.damping);
+
+			if (point.v.magnitude() > this.maxVelocity) {
+				point.v = point.v.divide(10);
+			}
+
 			point.a = new Vector(0,0);
 		});
 	};
