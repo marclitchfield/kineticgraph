@@ -77,7 +77,7 @@
 
 		function createNode(label, parent) {
 			var circle = new Kinetic.Circle({
-				radius: 10,
+				radius: 15,
 				fill: 'gray',
 				stroke: 'black',
 				strokeWidth: 2,
