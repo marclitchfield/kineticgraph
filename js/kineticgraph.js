@@ -89,7 +89,7 @@
 
 			var node = graph.newNode({ label: label, shape: circle, parent: parent });
 
-			circle.on('mousemove', function() {
+			circle.on('mousemove click tap', function() {
 				for(var i=0; i<4; i++) {
 					var newGuy = createNode(label + "'", node);
 					createEdge(node, newGuy);
